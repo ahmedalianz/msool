@@ -8,58 +8,65 @@ import Pill from './Pill';
 import PlanCard from './PlanCard';
 import PlusMinus from './PlusMinus';
 import ToggleSwitch from './ToggleSwitch';
+import {useQuery} from '@tanstack/react-query';
 
 export default function Plans() {
   const {apiPublic} = useApi();
   const {isRTL} = useIsRTL();
   const [swiper, setSwiper] = useState<SwiperClass | null>(null);
-
-  const [subscriptionFeatures, setSubscriptionFeatures] = useState([]);
-  const [plan1, setPlan1] = useState<IPlanState>({});
-  const [plan2, setPlan2] = useState<IPlanState>({});
-  const [plan3, setPlan3] = useState<IPlanState>({});
-  const [loading, setLoading] = useState<boolean>(true);
+  const {isLoading: subscriptionFeaturesLoading, data: subscriptionFeatures} =
+    useQuery({
+      queryKey: ['subscriptionFeatures'],
+      queryFn: () =>
+        apiPublic('get-subscription-features').then(response =>
+          response.data.result.map(
+            (result: {features: string}) => result.features,
+          ),
+        ),
+    });
+  const {isLoading: plan1Loading, data: plan1} = useQuery<IPlanState>({
+    queryKey: ['plan1'],
+    queryFn: () =>
+      apiPublic('get-subscriptions-plans?subscriptionPlanNameId=1').then(
+        (response: any) => {
+          const plan1 = response.data?.result;
+          return {
+            monthly: plan1[0],
+            yearly: plan1[1],
+          };
+        },
+      ),
+  });
+  const {isLoading: plan2Loading, data: plan2} = useQuery<IPlanState>({
+    queryKey: ['plan2'],
+    queryFn: () =>
+      apiPublic('get-subscriptions-plans?subscriptionPlanNameId=2').then(
+        (response: any) => {
+          const plan2 = response.data?.result;
+          return {
+            monthly: plan2[0],
+            yearly: plan2[1],
+          };
+        },
+      ),
+  });
+  const {isLoading: plan3Loading, data: plan3} = useQuery<IPlanState>({
+    queryKey: ['plan3'],
+    queryFn: () =>
+      apiPublic('get-subscriptions-plans?subscriptionPlanNameId=3').then(
+        (response: any) => {
+          const plan3 = response.data?.result;
+          return {
+            monthly: plan3[0],
+            yearly: plan3[1],
+          };
+        },
+      ),
+  });
+  const loading =
+    subscriptionFeaturesLoading || plan1Loading || plan2Loading || plan3Loading;
   const [monthly, setMonthly] = useState<boolean>(true);
   const [propertyCount, setPropertyCount] = useState<number>(0);
-  const getSubscriptionPlans = async () => {
-    Promise.all([
-      apiPublic('get-subscription-features'),
-      apiPublic<{result: Array<IPlanResponse>}>(
-        'get-subscriptions-plans?subscriptionPlanNameId=1',
-      ),
-      apiPublic('get-subscriptions-plans?subscriptionPlanNameId=2'),
-      apiPublic('get-subscriptions-plans?subscriptionPlanNameId=3'),
-    ])
-      .then(res => {
-        setSubscriptionFeatures(
-          res?.[0]?.data?.result?.map(
-            (result: {features: string}) => result.features,
-          ) || [],
-        );
-        const plan1 = res[1].data?.result;
-        setPlan1({
-          monthly: plan1[0],
-          yearly: plan1[1],
-        });
-        const plan2 = res[2].data?.result;
-        setPlan2({
-          monthly: plan2[0],
-          yearly: plan2[1],
-        });
-        const plan3 = res[3].data?.result;
-        setPlan3({
-          monthly: plan3[0],
-          yearly: plan3[1],
-        });
-      })
-      .catch(err => {
-        console.log('Error Getting Plans ====>', err);
-      })
-      .finally(() => setLoading(false));
-  };
-  useEffect(() => {
-    getSubscriptionPlans();
-  }, []);
   const toggleMonthly = () => setMonthly(prev => !prev);
   const increaseCount = () => {
     setPropertyCount(prev => prev + 1);

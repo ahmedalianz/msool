@@ -13,7 +13,7 @@ export default function Home() {
       <Button
         title={isRTL ? 'En' : 'ع'}
         onClick={() => changeLanguage(isRTL ? 'en' : 'ar')}
-        className="fixed top-2 start-2 "
+        className="fixed top-2 start-2 z-40"
       />
       <Hero />
       <Solutions />

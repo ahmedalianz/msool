@@ -2,7 +2,7 @@ import {FC, ReactNode, Suspense, useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {HelmetProvider} from 'react-helmet-async';
-
+import {ReactQueryDevtools} from '@tanstack/react-query-devtools';
 const mode = import.meta.env.VITE_MODE ?? 'not-found';
 const dir = {
   ar: 'rtl',
@@ -34,6 +34,7 @@ export const AllProviders: FC<{children: ReactNode}> = ({children}) => {
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
           {children}
+          <ReactQueryDevtools />
         </QueryClientProvider>
       </HelmetProvider>
     </Suspense>
